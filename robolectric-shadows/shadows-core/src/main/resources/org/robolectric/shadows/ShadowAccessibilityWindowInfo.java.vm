@@ -1,0 +1,171 @@
+package org.robolectric.shadows;
+#if ($api >= 21)
+import android.graphics.Rect;
+import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityWindowInfo;
+
+import org.robolectric.annotation.Implementation;
+import org.robolectric.annotation.Implements;
+import org.robolectric.annotation.RealObject;
+import org.robolectric.internal.ShadowExtractor;
+import org.robolectric.util.ReflectionHelpers;
+
+import java.util.LinkedList;
+import java.util.List;
+
+/**
+ * Shadow of {@link android.view.accessibility.AccessibilityWindowInfo} that allows a test to set
+ * properties that are locked in the original class.
+ */
+@Implements(AccessibilityWindowInfo.class)
+public class ShadowAccessibilityWindowInfo {
+  private List<AccessibilityWindowInfo> children = null;
+
+  private AccessibilityWindowInfo parent = null;
+
+  private AccessibilityNodeInfo rootNode = null;
+
+  private Rect boundsInScreen = new Rect();
+
+  private int type = AccessibilityWindowInfo.TYPE_APPLICATION;
+
+  private int layer = 0;
+
+  private int id = 0;
+
+  private boolean isAccessibilityFocused = false;
+
+  private boolean isActive = false;
+
+  private boolean isFocused = false;
+
+  @RealObject
+  private AccessibilityWindowInfo mRealAccessibilityWindowInfo;
+
+  public void __constructor__() {}
+
+  @Implementation
+  public static AccessibilityWindowInfo obtain() {
+    return ReflectionHelpers.callConstructor(AccessibilityWindowInfo.class);
+  }
+
+  @Implementation
+  public int getType() {
+    return type;
+  }
+
+  @Implementation
+  public int getChildCount() {
+    if (children == null) {
+      return 0;
+    }
+
+    return children.size();
+  }
+
+  @Implementation
+  public AccessibilityWindowInfo getChild(int index) {
+    if (children == null) {
+      return null;
+    }
+
+    return children.get(index);
+  }
+
+  @Implementation
+  public AccessibilityWindowInfo getParent() {
+    return parent;
+  }
+
+  @Implementation
+  public AccessibilityNodeInfo getRoot() {
+    return (rootNode == null) ? null : AccessibilityNodeInfo.obtain(rootNode);
+  }
+
+  @Implementation
+  public boolean isActive() {
+    return isActive;
+  }
+
+  @Implementation
+  public int getId() {
+    return id;
+  }
+
+  @Implementation
+  public void getBoundsInScreen(Rect outBounds) {
+    if (boundsInScreen == null) {
+      outBounds.setEmpty();
+    } else {
+      outBounds.set(boundsInScreen);
+    }
+  }
+
+  @Implementation
+  public int getLayer() {
+    return layer;
+  }
+
+  @Implementation
+  public boolean isFocused() {
+    return isFocused;
+  }
+
+  @Implementation
+  public boolean isAccessibilityFocused() {
+    return isAccessibilityFocused;
+  }
+
+  @Implementation
+  public void recycle() {
+    // This shadow does not track recycling of windows.
+  }
+
+  public void setRoot(AccessibilityNodeInfo root) {
+    rootNode = root;
+  }
+
+  public void setType(int value) {
+    type = value;
+  }
+
+  public void setBoundsInScreen(Rect bounds) {
+    boundsInScreen.set(bounds);
+  }
+
+  public void setAccessibilityFocused(boolean value) {
+    isAccessibilityFocused = value;
+  }
+
+  public void setActive(boolean value) {
+    isActive = value;
+  }
+
+  public void setId(int value) {
+    id = value;
+  }
+
+  public void setLayer(int value) {
+    layer = value;
+  }
+
+  public void setFocused(boolean focused) {
+    isFocused = focused;
+  }
+
+  public void addChild(AccessibilityWindowInfo child) {
+    if (children == null) {
+      children = new LinkedList<>();
+    }
+
+    children.add(child);
+    ((ShadowAccessibilityWindowInfo) ShadowExtractor.extract(child)).parent =
+        mRealAccessibilityWindowInfo;
+  }
+}
+#else
+public class ShadowAccessibilityWindowInfo {
+  // Dummy class, this was added in API21
+}
+#end
+
